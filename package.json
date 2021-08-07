@@ -1,0 +1,37 @@
+{
+    "name": "waso3",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "nodemon ./src/index.js",
+        "linter": "eslint --fix src/"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "bcrypt": "^5.0.1",
+        "body-parser": "^1.19.0",
+        "eslint": "^5.16.0",
+        "eslint-config-google": "^0.14.0",
+        "eslint-config-prettier": "^6.5.0",
+        "eslint-plugin-prettier": "^3.1.1",
+        "express": "^4.17.1",
+        "express-http-context": "^1.2.4",
+        "joi": "^17.4.0",
+        "jsonwebtoken": "^8.5.1",
+        "knex": "^0.95.2",
+        "log4js": "^6.3.0",
+        "moment": "^2.29.1",
+        "mysql": "^2.18.1",
+        "nodemailer": "^4.7.0",
+        "nodemon": "^2.0.7",
+        "pug": "^3.0.2",
+        "serialize-error": "^8.1.0",
+        "socket.io": "^3.1.2",
+        "sql": "^0.78.0"
+    },
+    "devDependencies": {
+        "dotenv": "^10.0.0"
+    }
+}

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Ecommerce</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css">
+</head>
+
+<body>
+    <div style="background-color: rgb(220, 220, 220);" id="chat-app">
+        <div class="has-text-centered" id="chat">
+            <section class="hero is-success">
+                <div class="hero-body">
+                    <div class="container">
+                        <h1 style="color: #000;" class="title">Ecommerce chat</h1>
+                    </div>
+                </div>
+            </section>
+            <section class="section chat-container">
+                <div class="container">
+                    <div class="columns">
+                        <div style="background-color: rgb(231, 231, 231);" class="box column is-8 is-offset-2">
+                            <h2 class="title">Chatbox</h2>
+                            <div class="hero is-success column is-6 is-offset-3">
+                                <ul style="background-color: rgb(0, 0, 0); " id="messages"></ul>
+                            </div>
+                            <form onsubmit="return addMessage (this)">
+                                <div class="column is-6 is-offset-3">
+                                    <p class="control"><input class="input" type="text" autocomplete="off" id="token" placeholder="Your user token"></p>
+                                    <p class="control"><select class="input" name="select" id="selector">
+                                        <option value="stock">Stock</option>
+                                        <option value="order">Order</option>
+                                        <option value="cart">Cart</option>
+                                    </select></p>
+                                    <p class="column is-6 is-offset-3"><input class="button is-success" type="submit" value="Send"></p>
+                                </div>
+                            </form>
+                            <div class="hero-body">
+                                <ul id="chat-messages"></ul>
+                                <ul id="total"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+        const socket = io();
+        // =========================== RENDER INFO ==========================
+        function render (data) {
+            document.getElementById('messages').innerHTML = data;
+        }
+
+        function renderSuccess (data) {
+            document.getElementById('messages').innerHTML = data;
+        }
+
+        function renderStock (data) {
+            let html = data.map(function(elem,index){
+                return(`<div>
+                    <strong>${elem.title}</strong>:
+                    <em>Stock = ${elem.stock}</em>
+                    </div>`)
+            }).join(" ");
+            document.getElementById('chat-messages').innerHTML = html;
+        }
+
+        function renderOrder (data) {
+            let html = data.map(function(elem,index){
+                return(`<div>
+                    <strong>Order Id:${elem.order_id},</strong>
+                    <em>Condition: ${elem.condition},</em>
+                    <em>Total: $${elem.total}</em>
+                    </div>`)
+            }).join(" ");
+            document.getElementById('chat-messages').innerHTML = html;
+        }
+
+        function renderCart (data) {
+            let html = data.products.map(function(elem,index){
+                return(`<div>
+                    <strong>Title:${elem.title},</strong>
+                    <em>Price: ${elem.price},</em>
+                    <em>Quantity: ${elem.quantity},</em>
+                    </div>`)
+            }).join(" ");
+            document.getElementById('chat-messages').innerHTML = html;
+        }
+
+        function renderTotal (data) {
+            let html = `<div><strong>Total: $${data}</strong></div>`
+            document.getElementById('total').innerHTML = html;
+        }
+
+        function renderCartEmpty (data) {
+            document.getElementById('messages').innerHTML = data;
+        }
+
+        // ========================= SOKETS.ON ================================
+        socket.on('token', (response) => {
+            render (response)
+        })
+
+        socket.on('tokenSuccess', (response) => {
+            renderSuccess (response)
+        })
+
+        socket.on('stock_response', (response) => {
+            renderStock (response);
+        })
+
+        socket.on('order_response', (response) => {
+            renderOrder (response);
+        })
+
+        socket.on('cart_response', (response) => {
+            renderCart (response);
+            renderTotal(response.total)
+        })
+
+        socket.on('cart_response_empty' , (response) => {
+            renderCartEmpty (response);
+        })
+
+        // ========================= FUNCIONES ===================================
+        function addMessage (e) {
+            let mensaje = {
+                token: document.getElementById('token').value,
+                select: document.getElementById('selector').value
+            };
+            socket.emit('user_token',mensaje);
+            return false;
+        }
+
+    </script>
+</body>
+</html>

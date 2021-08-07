@@ -1,0 +1,119 @@
+doctype html
+head
+  title Ecommerce
+  link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css')
+#chat-app(style='background-color: rgb(220, 220, 220);')
+  #chat.has-text-centered
+    section.hero.is-success
+      .hero-body
+        .container
+          h1.title(style='color: #000;') Ecommerce chat
+    section.section.chat-container
+      .container
+        .columns
+          .box.column.is-8.is-offset-2(style='background-color: rgb(231, 231, 231);')
+            h2.title Chatbox
+            .hero.is-success.column.is-6.is-offset-3
+              ul#messages(style='background-color: rgb(0, 0, 0); ')
+            form(onsubmit='return addMessage (this)')
+              .column.is-6.is-offset-3
+                p.control
+                  input#token.input(type='text' autocomplete='off' placeholder='Your user token')
+                p.control
+                  select#selector.input(name='select')
+                    option(value='stock') Stock
+                    option(value='order') Order
+                    option(value='cart') Cart
+                p.column.is-6.is-offset-3
+                  input.button.is-success(type='submit' value='Send')
+            .hero-body
+              ul#chat-messages
+              ul#total
+script(src="/socket.io/socket.io.js")
+script.
+  const socket= io();
+        // =========================== RENDER INFO ==========================
+        function render (data) {
+            document.getElementById('messages').innerHTML = data;
+        }
+
+        function renderSuccess (data) {
+            document.getElementById('messages').innerHTML = data;
+        }
+
+        function renderStock (data) {
+            let html = data.map(function(elem,index){
+                return(`<div>
+                    <strong>${elem.title}</strong>:
+                    <em>Stock = ${elem.stock}</em>
+                    </div>`)
+            }).join(" ");
+            document.getElementById('chat-messages').innerHTML = html;
+        }
+
+        function renderOrder (data) {
+            let html = data.map(function(elem,index){
+                return(`<div>
+                    <strong>Order Id:${elem.order_id},</strong>
+                    <em>Condition: ${elem.condition},</em>
+                    <em>Total: $${elem.total}</em>
+                    </div>`)
+            }).join(" ");
+            document.getElementById('chat-messages').innerHTML = html;
+        }
+
+        function renderCart (data) {
+            let html = data.products.map(function(elem,index){
+                return(`<div>
+                    <strong>Title:${elem.title},</strong>
+                    <em>Price: ${elem.price},</em>
+                    <em>Quantity: ${elem.quantity},</em>
+                    </div>`)
+            }).join(" ");
+            document.getElementById('chat-messages').innerHTML = html;
+        }
+
+        function renderTotal (data) {
+            let html = `<div><strong>Total: $${data}</strong></div>`
+            document.getElementById('total').innerHTML = html;
+        }
+
+        function renderCartEmpty (data) {
+            document.getElementById('messages').innerHTML = data;
+        }
+
+        // ========================= SOKETS ================================
+        socket.on('token', (response) => {
+            render (response)
+        })
+
+        socket.on('tokenSuccess', (response) => {
+            renderSuccess (response)
+        })
+
+        socket.on('stock_response', (response) => {
+            renderStock (response);
+        })
+
+        socket.on('order_response', (response) => {
+            renderOrder (response);
+        })
+
+        socket.on('cart_response', (response) => {
+            renderCart (response);
+            renderTotal(response.total)
+        })
+
+        socket.on('cart_response_empty' , (response) => {
+            renderCartEmpty (response);
+        })
+
+        // ========================= FUNCIONES ===================================
+        function addMessage (e) {
+            let mensaje = {
+                token: document.getElementById('token').value,
+                select: document.getElementById('selector').value
+            };
+            socket.emit('user_token',mensaje);
+            return false;
+        }
